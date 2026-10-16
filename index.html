@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik Arenası - Maarif Modeli</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+        }
+
+        nav button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        nav button:hover, nav button.active {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-blue);
+        }
+
+        .question-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-nav-buttons {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .q-num-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(255,255,255,0.05);
+            color: var(--text-main);
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .q-num-btn.active {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .q-num-btn.solved {
+            background-color: var(--accent-green);
+            border-color: var(--accent-green);
+        }
+
+        .question-body {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            white-space: pre-line;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .option-btn {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 10px;
+            color: var(--text-main);
+            text-align: left;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-color: var(--accent-blue);
+        }
+
+        .option-btn.correct {
+            background-color: rgba(16, 185, 129, 0.2) !important;
+            border-color: var(--accent-green) !important;
+            color: var(--accent-green);
+        }
+
+        .option-btn.wrong {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            border-color: var(--accent-red) !important;
+            color: var(--accent-red);
+        }
+
+        .solution-box {
+            margin-top: 1.5rem;
+            padding: 1.2rem;
+            background-color: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--accent-purple);
+            border-radius: 10px;
+            display: none;
+        }
+
+        .profile-box, .admin-box {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background-color: rgba(255,255,255,0.03);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+        }
+
+        form label {
+            display: block;
+            margin-top: 1rem;
+            margin-bottom: 0.3rem;
+            color: var(--text-sub);
+        }
+
+        form input, form select, form textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(0,0,0,0.2);
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        .primary-btn {
+            margin-top: 1.5rem;
+            background-color: var(--accent-blue);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .breadcrumb {
+            color: var(--text-sub);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .breadcrumb span {
+            cursor: pointer;
+            color: var(--accent-blue);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="showClasses()">📐 Maarif Matematik</div>
+        <nav>
+            <button onclick="showClasses()">Sınıflar</button>
+            <button onclick="showProfile()">Profilim</button>
+            <button onclick="showAdmin()">Admin Paneli</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        
+        <section id="view-classes" class="view-section active">
+            <h2>Sınıfınızı Seçin</h2>
+            <p style="color: var(--text-sub);">Türkiye Yüzyılı Maarif Modeli Müfredatı</p>
+            <div class="grid" id="class-grid"></div>
+        </section>
+
+        <section id="view-topics" class="view-section">
+            <div class="breadcrumb"><span onclick="showClasses()">Sınıflar</span> &gt; <span id="selected-class-title"></span></div>
+            <h2>Konu Seçin</h2>
+            <div class="grid" id="topic-grid"></div>
+        </section>
+
+        <section id="view-question" class="view-section">
+            <div class="breadcrumb">
+                <span onclick="showClasses()">Sınıflar</span> &gt; 
+                <span onclick="showTopics(currentClass)">Konular</span> &gt; 
+                <span id="selected-topic-title"></span>
+            </div>
+
+            <div class="question-card">
+                <div class="question-header">
+                    <h3 id="q-title">Soru 1</h3>
+                    <span id="q-score" style="color: var(--accent-green); font-weight: bold;">+10 Puan</span>
+                </div>
+
+                <div class="question-nav-buttons" id="q-nav-buttons"></div>
+
+                <div class="question-body" id="q-text">Soru yükleniyor...</div>
+
+                <div class="options-list" id="q-options"></div>
+
+                <div class="solution-box" id="q-solution">
+                    <strong>Çözüm & Açıklama:</strong>
+                    <p id="q-solution-text" style="margin-top: 0.5rem;"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-profile" class="view-section">
+            <div class="profile-box">
+                <h2>Öğrenci Profili</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4 id="stat-score">0</h4>
+                        <p>Toplam Puan</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4 id="stat-solved">0</h4>
+                        <p>Çözülen Soru</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4 id="stat-accuracy">%0</h4>
+                        <p>Başarı Oranı</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-admin" class="view-section">
+            <div class="admin-box">
+                <h2>Admin Paneli - Yeni Soru Ekle</h2>
+                <form id="add-question-form" onsubmit="saveQuestion(event)">
+                    <label>Sınıf:</label>
+                    <select id="admin-class" required>
+                        <option value="1">1. Sınıf</option>
+                        <option value="2">2. Sınıf</option>
+                        <option value="3">3. Sınıf</option>
+                        <option value="4">4. Sınıf</option>
+                        <option value="5">5. Sınıf</option>
+                        <option value="6">6. Sınıf</option>
+                        <option value="7">7. Sınıf</option>
+                        <option value="8">8. Sınıf</option>
+                        <option value="9">9. Sınıf</option>
+                        <option value="10">10. Sınıf</option>
+                        <option value="11">11. Sınıf</option>
+                        <option value="12">12. Sınıf</option>
+                    </select>
+
+                    <label>Konu Adı:</label>
+                    <input type="text" id="admin-topic" placeholder="Örn: Polinomlar" required>
+
+                    <label>Soru Metni:</label>
+                    <textarea id="admin-text" rows="3" required></textarea>
+
+                    <label>Seçenekler (Şıklar):</label>
+                    <input type="text" class="opt-input" placeholder="A Şıkkı" required style="margin-bottom:0.3rem;">
+                    <input type="text" class="opt-input" placeholder="B Şıkkı" required style="margin-bottom:0.3rem;">
+                    <input type="text" class="opt-input" placeholder="C Şıkkı" required style="margin-bottom:0.3rem;">
+                    <input type="text" class="opt-input" placeholder="D Şıkkı" required style="margin-bottom:0.3rem;">
+
+                    <label>Doğru Cevap İndeksi (0=A, 1=B, 2=C, 3=D):</label>
+                    <select id="admin-correct" required>
+                        <option value="0">A Şıkkı</option>
+                        <option value="1">B Şıkkı</option>
+                        <option value="2">C Şıkkı</option>
+                        <option value="3">D Şıkkı</option>
+                    </select>
+
+                    <label>Detaylı Çözüm:</label>
+                    <textarea id="admin-solution" rows="2" required></textarea>
+
+                    <button type="submit" class="primary-btn">Soruyu Veritabanına Ekle</button>
+                </form>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        let questionBank = JSON.parse(localStorage.getItem('maarif_qbank')) || {
+            "9": {
+                "Mantık ve Kümeler": generateSampleQuestions("9. Sınıf", "Mantık ve Kümeler"),
+                "Denklem ve Eşitsizlikler": generateSampleQuestions("9. Sınıf", "Denklem ve Eşitsizlikler"),
+                "Üslü ve Köklü İfadeler": generateSampleQuestions("9. Sınıf", "Üslü ve Köklü İfadeler"),
+                "Üçgenler ve Geometri": generateSampleQuestions("9. Sınıf", "Üçgenler ve Geometri")
+            },
+            "10": {
+                "Polinomlar": [
+                    {
+                        text: "P(x) = 3x^2 - 5x + 7 polinomunun x = 2 için değeri kaçtır?",
+                        options: ["A) 7", "B) 9", "C) 11", "D) 13"],
+                        correct: 1,
+                        solution: "P(2) = 3(2)^2 - 5(2) + 7 = 3(4) - 10 + 7 = 12 - 10 + 7 = 9 elde edilir."
+                    },
+                    ...generateSampleQuestions("10. Sınıf", "Polinomlar").slice(1)
+                ],
+                "İkinci Dereceden Denklemler": generateSampleQuestions("10. Sınıf", "İkinci Dereceden Denklemler"),
+                "Fonksiyonlar": generateSampleQuestions("10. Sınıf", "Fonksiyonlar")
+            }
+        };
+
+        function generateSampleQuestions(sinif, konu) {
+            let list = [];
+            for(let i=1; i<=10; i++) {
+                list.push({
+                    text: `${sinif} - ${konu} Konusu Maarif Modeli Soru ${i}:\nAşağıdaki işlemlerden hangisi doğrudur? (${i} + ${i*2} = ?)`,
+                    options: [`A) ${i*3}`, `B) ${i*3 + 2}`, `C) ${i*2}`, `D) ${i*4}`],
+                    correct: 0,
+                    solution: `Doğru cevap A seçeneğidir. İşlem: ${i} + ${i*2} = ${i*3} yapar.`
+                });
+            }
+            return list;
+        }
+
+        let userStats = JSON.parse(localStorage.getItem('maarif_stats')) || {
+            score: 0,
+            solvedCount: 0,
+            correctCount: 0,
+            answeredQuestions: {}
+        };
+
+        let currentClass = null;
+        let currentTopic = null;
+        let currentQIndex = 0;
+
+        function showClasses() {
+            hideAll();
+            document.getElementById('view-classes').classList.add('active');
+            const grid = document.getElementById('class-grid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 12; i++) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<h3>${i}. Sınıf</h3><p>Maarif Müfredatı</p>`;
+                card.onclick = () => showTopics(i);
+                grid.appendChild(card);
+            }
+        }
+
+        function showTopics(cNum) {
+            currentClass = cNum;
+            hideAll();
+            document.getElementById('view-topics').classList.add('active');
+            document.getElementById('selected-class-title').innerText = `${cNum}. Sınıf`;
+
+            const grid = document.getElementById('topic-grid');
+            grid.innerHTML = '';
+
+            if (!questionBank[cNum]) {
+                questionBank[cNum] = {
+                    "Temel Kavramlar": generateSampleQuestions(`${cNum}. Sınıf`, "Temel Kavramlar"),
+                    "Genel Tekrar Testi": generateSampleQuestions(`${cNum}. Sınıf`, "Genel Tekrar Testi")
+                };
+            }
+
+            Object.keys(questionBank[cNum]).forEach(topic => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<h3>${topic}</h3><p>10 Soru / Test</p>`;
+                card.onclick = () => loadTopicQuestions(topic);
+                grid.appendChild(card);
+            });
+        }
+
+        function loadTopicQuestions(topic) {
+            currentTopic = topic;
+            currentQIndex = 0;
+            hideAll();
+            document.getElementById('view-question').classList.add('active');
+            document.getElementById('selected-topic-title').innerText = topic;
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qList = questionBank[currentClass][currentTopic];
+            const qData = qList[currentQIndex];
+
+            const navBox = document.getElementById('q-nav-buttons');
+            navBox.innerHTML = '';
+            qList.forEach((_, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `q-num-btn ${idx === currentQIndex ? 'active' : ''}`;
+                const qKey = `${currentClass}_${currentTopic}_${idx}`;
+                if (userStats.answeredQuestions[qKey] !== undefined) {
+                    btn.classList.add('solved');
+                }
+                btn.innerText = idx + 1;
+                btn.onclick = () => {
+                    currentQIndex = idx;
+                    renderQuestion();
+                };
+                navBox.appendChild(btn);
+            });
+
+            document.getElementById('q-title').innerText = `Soru ${currentQIndex + 1} / ${qList.length}`;
+            document.getElementById('q-text').innerText = qData.text;
+
+            const optsBox = document.getElementById('q-options');
+            optsBox.innerHTML = '';
+
+            const solutionBox = document.getElementById('q-solution');
+            solutionBox.style.display = 'none';
+
+            const qKey = `${currentClass}_${currentTopic}_${currentQIndex}`;
+            const previousAnswer = userStats.answeredQuestions[qKey];
+
+            qData.options.forEach((optText, oIdx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = optText;
+
+                if (previousAnswer !== undefined) {
+                    btn.disabled = true;
+                    if (oIdx === qData.correct) btn.classList.add('correct');
+                    if (previousAnswer === oIdx && previousAnswer !== qData.correct) btn.classList.add('wrong');
+                } else {
+                    btn.onclick = () => handleAnswer(oIdx, qData.correct);
+                }
+
+                optsBox.appendChild(btn);
+            });
+
+            if (previousAnswer !== undefined) {
+                document.getElementById('q-solution-text').innerText = qData.solution;
+                solutionBox.style.display = 'block';
+            }
+        }
+
+        function handleAnswer(selectedIdx, correctIdx) {
+            const qKey = `${currentClass}_${currentTopic}_${currentQIndex}`;
+            userStats.answeredQuestions[qKey] = selectedIdx;
+            userStats.solvedCount++;
+
+            if (selectedIdx === correctIdx) {
+                userStats.score += 10;
+                userStats.correctCount++;
+            }
+
+            localStorage.setItem('maarif_stats', JSON.stringify(userStats));
+            renderQuestion();
+        }
+
+        function showProfile() {
+            hideAll();
+            document.getElementById('view-profile').classList.add('active');
+            document.getElementById('stat-score').innerText = userStats.score;
+            document.getElementById('stat-solved').innerText = userStats.solvedCount;
+            
+            const acc = userStats.solvedCount > 0 
+                ? Math.round((userStats.correctCount / userStats.solvedCount) * 100) 
+                : 0;
+            document.getElementById('stat-accuracy').innerText = `%${acc}`;
+        }
+
+        function showAdmin() {
+            hideAll();
+            document.getElementById('view-admin').classList.add('active');
+        }
+
+        function saveQuestion(e) {
+            e.preventDefault();
+            const cVal = document.getElementById('admin-class').value;
+            const tVal = document.getElementById('admin-topic').value;
+            const textVal = document.getElementById('admin-text').value;
+            const correctVal = parseInt(document.getElementById('admin-correct').value);
+            const solVal = document.getElementById('admin-solution').value;
+
+            const optInputs = document.querySelectorAll('.opt-input');
+            const optionsArr = Array.from(optInputs).map(i => i.value);
+
+            if (!questionBank[cVal]) questionBank[cVal] = {};
+            if (!questionBank[cVal][tVal]) questionBank[cVal][tVal] = [];
+
+            questionBank[cVal][tVal].push({
+                text: textVal,
+                options: optionsArr,
+                correct: correctVal,
+                solution: solVal
+            });
+
+            localStorage.setItem('maarif_qbank', JSON.stringify(questionBank));
+            alert('Soru başarıyla eklendi!');
+            document.getElementById('add-question-form').reset();
+        }
+
+        function hideAll() {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+        }
+
+        showClasses();
+    </script>
+</body>
+</html>
